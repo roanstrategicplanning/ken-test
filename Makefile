@@ -17,8 +17,10 @@ help:
 	@echo "  make up       - Run the container (starts the app)"
 	@echo "  make down     - Stop and remove the container"
 	@echo "  make logs     - View container logs"
+	@echo "  make status   - Check if container is running"
 	@echo "  make clean    - Remove the image and container"
 	@echo "  make rebuild  - Rebuild everything from scratch"
+	@echo "  make fresh    - Stop, clean, build, and start (all-in-one)"
 
 # Build the Docker image
 # docker build = Build an image from Dockerfile
@@ -35,23 +37,32 @@ build:
 # --name = Give the container a friendly name
 # -p = Port mapping: HOST_PORT:CONTAINER_PORT
 #   This maps localhost:8501 on your computer to port 8501 in the container
-# --rm = Automatically remove container when it stops (cleanup)
+# -v = Volume mount: HOST_PATH:CONTAINER_PATH
+#   This mounts templates directory so changes are reflected without rebuild
 # $(IMAGE_NAME) = The image to run
 up:
-	@echo "Starting Streamlit app..."
+	@echo "Starting Flask app..."
 	@echo "The app will be available at: http://localhost:$(PORT)"
-	docker run -d --name $(CONTAINER_NAME) -p $(PORT):8501 --rm $(IMAGE_NAME)
+	docker run -d --name $(CONTAINER_NAME) -p $(PORT):8501 -v $(PWD)/templates:/app/templates $(IMAGE_NAME)
 	@echo "Container started! Open http://localhost:$(PORT) in your browser."
+	@echo "Check logs with: make logs"
 
 # Stop and remove the container
 down:
 	@echo "Stopping container..."
 	docker stop $(CONTAINER_NAME) || true
-	@echo "Container stopped."
+	docker rm $(CONTAINER_NAME) || true
+	@echo "Container stopped and removed."
 
 # View container logs (useful for debugging)
 logs:
-	docker logs -f $(CONTAINER_NAME)
+	@echo "Showing logs for $(CONTAINER_NAME)..."
+	@docker logs -f $(CONTAINER_NAME) || echo "Container not found. It may have stopped. Check with: docker ps -a"
+
+# Check container status
+status:
+	@echo "Checking container status..."
+	@docker ps -a --filter name=$(CONTAINER_NAME) || echo "No containers found with name $(CONTAINER_NAME)"
 
 # Clean up: remove container and image
 clean:
@@ -66,4 +77,13 @@ rebuild:
 	@echo "Rebuilding from scratch..."
 	docker build --no-cache -t $(IMAGE_NAME) .
 	@echo "Rebuild complete! Run 'make up' to start the app."
+
+# Fresh start: down, clean, build, and up in one command
+fresh:
+	@echo "Starting fresh rebuild..."
+	$(MAKE) down
+	$(MAKE) clean
+	$(MAKE) build
+	$(MAKE) up
+	@echo "Fresh rebuild complete!"
 

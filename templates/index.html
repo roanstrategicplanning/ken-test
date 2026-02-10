@@ -49,9 +49,6 @@
                     <button type="button" onclick="document.getElementById('file-input').click()" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3.5 rounded-xl font-semibold hover:shadow-lg transition-shadow">
                         <i class="fa-solid fa-folder-open mr-2"></i>Choose File
                     </button>
-                    <button type="button" id="import-url-btn" class="bg-white border-2 border-gray-300 text-gray-700 px-8 py-3.5 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
-                        <i class="fa-brands fa-google-drive mr-2"></i>Import from Google Sheet
-                    </button>
                     {% if current_filename %}
                     <button type="button" id="reset-btn" class="border-2 border-red-300 text-red-700 px-8 py-3.5 rounded-xl font-semibold hover:bg-red-50 transition-colors">
                         <i class="fa-solid fa-trash mr-2"></i>Clear File
@@ -566,48 +563,6 @@
             } catch (error) {
                 alert('Error resetting: ' + error.message);
             }
-        }
-    });
-
-    // Handle Google Sheets import
-    document.getElementById('import-url-btn')?.addEventListener('click', async function() {
-        const url = prompt('Enter Google Sheets URL:\n\nMake sure the sheet is published or shared with "Anyone with the link can view"');
-        
-        if (!url) {
-            return; // User cancelled
-        }
-        
-        // Validate it's a Google Sheets URL
-        if (!url.includes('docs.google.com/spreadsheets')) {
-            alert('Error: Please enter a valid Google Sheets URL (must contain docs.google.com/spreadsheets)');
-            return;
-        }
-        
-        // Show loading state
-        const btn = document.getElementById('import-url-btn');
-        const originalContent = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Importing...';
-        
-        try {
-            const response = await fetch('/import-google-sheet', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({url: url})
-            });
-            const data = await response.json();
-            
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert('Error: ' + data.message);
-                btn.disabled = false;
-                btn.innerHTML = originalContent;
-            }
-        } catch (error) {
-            alert('Error importing Google Sheet: ' + error.message);
-            btn.disabled = false;
-            btn.innerHTML = originalContent;
         }
     });
 
