@@ -43,7 +43,7 @@
                 <h3 class="text-2xl font-semibold text-gray-900 mb-2">Upload Your Data File</h3>
                 <p class="text-gray-600">Drag and drop your Excel (.xlsx, .xls) or CSV file here, or click to browse.</p>
             </div>
-            <form id="upload-form" enctype="multipart/form-data" class="mb-6">
+            <form id="upload-form" enctype="multipart/form-data" class="mb-6" onsubmit="event.preventDefault(); return false;">
                 <input type="file" id="file-input" name="file" accept=".xlsx,.xls,.csv" class="hidden" required>
                 <div class="flex items-center justify-center space-x-4 mb-6">
                     <button type="button" onclick="document.getElementById('file-input').click()" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3.5 rounded-xl font-semibold hover:shadow-lg transition-shadow">
@@ -130,6 +130,12 @@
         <h3 class="text-xl font-semibold text-gray-900">{{ current_filename }}</h3>
         <p class="text-sm text-gray-500 mt-1">File details and statistics.</p>
     </div>
+</div>
+{% endif %}
+
+{% if has_data %}
+<div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+    <p class="text-sm text-blue-800"><strong>Debug:</strong> Data loaded successfully. Rows: {{ total_rows }}, Columns: {{ total_columns }}, Numeric columns: {{ numeric_columns }}</p>
 </div>
 {% endif %}
 
@@ -287,6 +293,7 @@
             <div>
                 <h3 class="text-lg font-semibold text-amber-900 mb-1">No Numeric Data</h3>
                 <p class="text-amber-700">No numeric columns found for charting. Please upload an Excel file with numeric data.</p>
+                <p class="text-sm text-amber-600 mt-2">Total columns: {{ total_columns|default('N/A') }}, Numeric columns: {{ numeric_columns|default(0) }}</p>
             </div>
         </div>
     </div>
@@ -526,28 +533,75 @@
     }
 
     // Handle file upload
-    document.getElementById('file-input')?.addEventListener('change', async function(e) {
+    async function handleFileUpload(e) {
         if (e.target.files.length > 0) {
+            const fileInput = e.target;
+            const file = fileInput.files[0];
             const formData = new FormData();
-            formData.append('file', e.target.files[0]);
+            formData.append('file', file);
+
+            // Show loading indicator
+            const uploadArea = document.getElementById('upload-area');
+            const originalContent = uploadArea.innerHTML;
+            uploadArea.innerHTML = '<div class="p-12 text-center"><div class="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full mb-4"><i class="fa-solid fa-spinner fa-spin text-blue-600 text-3xl"></i></div><h3 class="text-xl font-semibold text-gray-900 mb-2">Uploading...</h3><p class="text-gray-600">Processing ' + file.name + '</p></div>';
 
             try {
                 const response = await fetch('/upload', {
                     method: 'POST',
                     body: formData
                 });
+                
+                // Check if response is ok before parsing JSON
+                if (!response.ok) {
+                    let errorMessage = 'Upload failed with status ' + response.status;
+                    try {
+                        const errorData = await response.json();
+                        if (errorData.message) {
+                            errorMessage = errorData.message;
+                        }
+                    } catch (e) {
+                        // If response isn't JSON, try to get text
+                        try {
+                            const text = await response.text();
+                            if (text) {
+                                errorMessage = text.substring(0, 200);
+                            }
+                        } catch (textError) {
+                            errorMessage = 'Server error: ' + response.status + ' ' + response.statusText;
+                        }
+                    }
+                    uploadArea.innerHTML = originalContent;
+                    alert('Error: ' + errorMessage);
+                    // Reset file input
+                    fileInput.value = '';
+                    return;
+                }
+                
                 const data = await response.json();
                 
                 if (data.success) {
-                    window.location.reload();
+                    // Show success message briefly before reload
+                    uploadArea.innerHTML = '<div class="p-12 text-center"><div class="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4"><i class="fa-solid fa-check-circle text-green-600 text-3xl"></i></div><h3 class="text-xl font-semibold text-gray-900 mb-2">Upload Successful!</h3><p class="text-gray-600">Loading data...</p></div>';
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
                 } else {
-                    alert('Error: ' + data.message);
+                    uploadArea.innerHTML = originalContent;
+                    alert('Error: ' + (data.message || 'Unknown error occurred'));
+                    // Reset file input
+                    fileInput.value = '';
                 }
             } catch (error) {
-                alert('Error uploading file: ' + error.message);
+                uploadArea.innerHTML = originalContent;
+                console.error('Upload error:', error);
+                alert('Error uploading file: ' + error.message + '\n\nPlease check the browser console for more details.');
+                // Reset file input
+                fileInput.value = '';
             }
         }
-    });
+    }
+    
+    document.getElementById('file-input')?.addEventListener('change', handleFileUpload);
 
     // Handle reset
     document.getElementById('reset-btn')?.addEventListener('click', async function() {
@@ -780,9 +834,21 @@
     const numericCols = {{ numeric_cols|tojson if numeric_cols else '[]' }};
     const columns = {{ columns|tojson if columns else '[]' }};
     const categoricalCols = {{ categorical_cols|tojson if categorical_cols else '[]' }};
+    
+    // Debug logging
+    console.log('Page loaded. Data status:', {
+        hasData: {% if has_data %}true{% else %}false{% endif %},
+        currentFilename: '{{ current_filename if current_filename else "None" }}',
+        numericCols: numericCols,
+        columns: columns,
+        categoricalCols: categoricalCols,
+        numericColsLength: numericCols.length,
+        columnsLength: columns.length
+    });
 
     // Auto-generate charts with default selections
     if (numericCols.length > 0) {
+        console.log('Numeric columns found, generating charts...');
         // Line chart
         if (numericCols.length > 0) {
             updateLineChart();
