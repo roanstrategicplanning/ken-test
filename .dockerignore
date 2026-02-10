@@ -1,0 +1,71 @@
+# .dockerignore - Files to exclude from the Docker build context
+# Similar to .gitignore, but for Docker builds
+# Excluding these files makes builds faster and images smaller
+# Docker won't even look at these files when building
+
+# Python virtual environments (NEVER include these in Docker!)
+# The Docker image has its own Python environment
+.venv
+venv/
+env/
+ENV/
+.venv/
+virtualenv/
+
+# Python cache files (not needed in Docker)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Git files (not needed in the running container)
+.git
+.gitignore
+.gitattributes
+
+# IDE and editor files (personal preference, not needed)
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# OS-specific files (not needed)
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Documentation (usually not needed in production image)
+README.md
+*.md
+docs/
+
+# Docker files themselves (don't need these inside the image)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Node modules (if any - not needed for Python app)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Test files (optional - exclude if you don't need them in production)
+tests/
+test_*.py
+*_test.py
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+*.swp

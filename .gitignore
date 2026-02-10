@@ -1,0 +1,32 @@
+# .gitignore - Files to exclude from Git version control
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker (optional - some people commit these)
+# Uncomment if you don't want to track Docker volumes/containers
+# docker-compose.override.yml
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
