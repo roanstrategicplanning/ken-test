@@ -5,27 +5,22 @@
 version: '3.8'
 
 services:
-  # Define our Flask app service
-  flask-app:
+  # Define our Streamlit app service
+  streamlit-app:
     # Build the image from the Dockerfile in current directory
     build:
       context: .
       dockerfile: Dockerfile
 
     # Name the container for easy identification
-    container_name: excel-visualizer
+    container_name: data-visualizer
 
     # Map port 8501 from container to your computer
     # Format: HOST_PORT:CONTAINER_PORT
     # This means localhost:8501 on your computer → port 8501 in container
-    # Flask app runs on port 8501
+    # Streamlit app runs on port 8501
     ports:
       - "8501:8501"
-
-    # Mount templates directory
-    # Format: HOST_PATH:CONTAINER_PATH
-    volumes:
-      - ./templates:/app/templates
 
     # Restart policy - restart container if it crashes
     restart: unless-stopped

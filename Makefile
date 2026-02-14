@@ -13,6 +13,12 @@ PORT = 8501
 # Help target - shows available commands
 help:
 	@echo "Available commands:"
+	@echo ""
+	@echo "Running without Docker (recommended for development):"
+	@echo "  make install  - Install Python dependencies"
+	@echo "  make run      - Run the Streamlit app directly (no Docker)"
+	@echo ""
+	@echo "Running with Docker:"
 	@echo "  make build    - Build the Docker image"
 	@echo "  make up       - Run the container (starts the app)"
 	@echo "  make down     - Stop and remove the container"
@@ -37,13 +43,11 @@ build:
 # --name = Give the container a friendly name
 # -p = Port mapping: HOST_PORT:CONTAINER_PORT
 #   This maps localhost:8501 on your computer to port 8501 in the container
-# -v = Volume mount: HOST_PATH:CONTAINER_PATH
-#   This mounts templates directory so changes are reflected without rebuild
 # $(IMAGE_NAME) = The image to run
 up:
-	@echo "Starting Flask app..."
+	@echo "Starting Streamlit app..."
 	@echo "The app will be available at: http://localhost:$(PORT)"
-	docker run -d --name $(CONTAINER_NAME) -p $(PORT):8501 -v $(PWD)/templates:/app/templates $(IMAGE_NAME)
+	docker run -d --name $(CONTAINER_NAME) -p $(PORT):8501 $(IMAGE_NAME)
 	@echo "Container started! Open http://localhost:$(PORT) in your browser."
 	@echo "Check logs with: make logs"
 
@@ -86,4 +90,29 @@ fresh:
 	$(MAKE) build
 	$(MAKE) up
 	@echo "Fresh rebuild complete!"
+
+# Install Python dependencies (for running without Docker)
+install:
+	@echo "Installing Python dependencies..."
+	@if command -v pip3 >/dev/null 2>&1; then \
+		pip3 install -r requirements.txt; \
+	elif command -v pip >/dev/null 2>&1; then \
+		pip install -r requirements.txt; \
+	else \
+		echo "Error: pip not found. Please install Python and pip first."; \
+		exit 1; \
+	fi
+	@echo "Dependencies installed! Run 'make run' to start the app."
+
+# Run Streamlit app directly (without Docker)
+run:
+	@echo "Starting Streamlit app..."
+	@echo "The app will be available at: http://localhost:$(PORT)"
+	@if command -v streamlit >/dev/null 2>&1; then \
+		streamlit run app.py --server.port $(PORT); \
+	else \
+		echo "Error: streamlit not found. Installing dependencies..."; \
+		$(MAKE) install; \
+		streamlit run app.py --server.port $(PORT); \
+	fi
 
