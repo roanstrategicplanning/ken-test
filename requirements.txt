@@ -2,8 +2,8 @@
 # These packages will be installed INSIDE the Docker container
 # Version numbers ensure everyone gets the same versions (reproducibility)
 
-streamlit==1.31.0      # Web framework for data apps - creates interactive browser apps
-pandas==2.1.3          # Data manipulation and analysis - read/write Excel, CSV, etc.
-plotly==5.18.0         # Interactive charting library - creates beautiful, interactive graphs
-openpyxl==3.1.2        # Excel file reader/writer - allows pandas to read .xlsx files
-numpy==1.26.3          # Numerical computing library - used for data type optimization
+streamlit>=1.41.0      # Web framework for data apps - creates interactive browser apps
+pandas>=2.2.0          # Data manipulation and analysis - read/write Excel, CSV, etc.
+plotly>=5.22.0         # Interactive charting library - creates beautiful, interactive graphs
+openpyxl>=3.1.5        # Excel file reader/writer - allows pandas to read .xlsx files
+numpy>=1.26.4          # Numerical computing library - used for data type optimization

@@ -363,24 +363,15 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 3. UPLOAD SECTION - Exact Match
+# 3. UPLOAD SECTION - Updated for Streamlit 1.41.0+
 st.markdown(f"""
     <style>
-    /* Hide the original 'Drag and drop file here' text */
-    div[data-testid="stFileDropzoneInstructions"]>div>span {{
-        visibility: hidden;
-    }}
-    /* Insert your custom text */
-    div[data-testid="stFileDropzoneInstructions"]>div>span::after {{
-        content: "Choose File to Upload";
-        visibility: visible;
-        display: block;
-        margin-top: -20px;
-    }}
-    /* Target the inner section of the uploader */
-    [data-testid="stFileUploader"] section {{
+    /* Target the inner section of the uploader - Updated for Streamlit 1.41+ */
+    [data-testid="stFileUploader"] section,
+    [data-testid="stFileUploader"] > div > section,
+    [data-testid="stFileUploader"] > section {{
         height: 300px !important;
-        background-color: #f8fafc;
+        background-color: #f8fafc !important;
         border: 2px dashed #e2e8f0 !important;
         border-radius: 12px !important;
         display: flex !important;
@@ -390,10 +381,53 @@ st.markdown(f"""
         padding: 48px 32px !important;
         transition: all 0.3s ease !important;
     }}
-
-    /* Optional: Ensure the internal text/icon stays centered */
-    [data-testid="stFileUploader"] section > div {{
-        margin: auto;
+    
+    /* Target the file uploader container */
+    [data-testid="stFileUploader"] {{
+        width: 100% !important;
+    }}
+    
+    /* Only hide text spans within instructions, preserve buttons */
+    div[data-testid="stFileDropzoneInstructions"] span {{
+        font-size: 0 !important;
+        line-height: 0 !important;
+        color: transparent !important;
+    }}
+    
+    /* Add custom text after instructions */
+    div[data-testid="stFileDropzoneInstructions"]::after {{
+        content: "Choose a file" !important;
+        display: block !important;
+        text-align: center !important;
+        color: #64748b !important;
+        font-size: 16px !important;
+        margin-top: 4px !important;
+        line-height: 1.5 !important;
+    }}
+    
+    /* Ensure buttons and interactive elements remain fully visible and functional */
+    [data-testid="stFileUploader"] button,
+    [data-testid="stFileUploader"] input[type="file"],
+    [data-testid="stFileUploader"] label,
+    [data-testid="stFileUploader"] a {{
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: inline-block !important;
+        font-size: 14px !important;
+        color: inherit !important;
+        position: relative !important;
+        z-index: 10 !important;
+    }}
+    
+    /* Ensure the internal content container stays centered */
+    [data-testid="stFileUploader"] section > div,
+    [data-testid="stFileUploader"] > div > section > div,
+    [data-testid="stFileUploader"] > section > div {{
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 12px !important;
     }}
     </style>
     """, unsafe_allow_html=True)
