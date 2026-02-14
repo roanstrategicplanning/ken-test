@@ -432,7 +432,7 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("", type=['xlsx', 'xls', 'csv'], label_visibility="hidden")
+uploaded_file = st.file_uploader("Upload File", type=['xlsx', 'xls', 'csv'], label_visibility="hidden")
 
 if uploaded_file is not None:
     if st.session_state.filename != uploaded_file.name:
