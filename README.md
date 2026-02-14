@@ -107,14 +107,11 @@ make run
 - **Plotly** - Interactive charting library
 - **OpenPyXL** - Excel file reader/writer
 - **NumPy** - Numerical computing
-- **Kaleido** - Static image export for charts
 
 ## ✨ Features
 
 - 📊 Upload Excel (.xlsx, .xls) and CSV files
 - 📈 Automatic chart generation (Line, Pie, Bar charts)
-- 💾 Export individual charts as PNG images
-- 📦 Export all charts as a ZIP file
 - 📥 Download processed data as Excel or CSV
 - 🎨 Beautiful, modern UI
 - ⚡ Fast processing of large files (up to 50MB, 100K rows)
@@ -156,7 +153,6 @@ docker logs -f streamlit-app
 
 - The app processes files up to 50MB
 - Maximum 100,000 rows are processed (for performance)
-- Charts are exported as PNG images (requires kaleido package, included in Docker image)
 - Files are processed in chunks for large datasets
 
 ## 🐳 Docker Image Details

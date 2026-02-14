@@ -9,7 +9,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 import os
-import io
 from datetime import datetime, timedelta
 import gc
 
@@ -170,17 +169,6 @@ st.markdown("""
     
     .stFileUploader label {
         display: none !important;
-    }
-
-    .export-icon {
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        margin-bottom: 16px;
-        font-size: 24px;
     }
 
     .feature-icon {
@@ -488,18 +476,18 @@ if st.session_state.df is not None:
                 <p style="font-size: 14px; color: #64748b; margin: 0;">From {st.session_state.filename}</p>
             </div>
             <div style="display: flex; gap: 12px;">
-                <button class="btn-outline" style="padding: 10px 20px; font-size: 14px;"><i class="fa-solid fa-download" style="font-size: 14px;"></i> Export All</button>
                 <button class="btn-outline" style="padding: 10px 20px; font-size: 14px;"><i class="fa-solid fa-sliders" style="font-size: 14px;"></i> Customize</button>
             </div>
         </div>
+    </div>
     """, unsafe_allow_html=True)
-
+    
     # Create columns for 2 charts per row
     col1, col2 = st.columns(2)
     
     # Chart 1: Monthly Revenue Trend (Line Chart)
     with col1:
-        st.markdown('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;"><h4 style="font-weight: 600; font-size: 14px; color: #0f172a;">Monthly Revenue Trend</h4><i class="fa-solid fa-download" style="color: #94a3b8; font-size: 16px; cursor: pointer;"></i></div>', unsafe_allow_html=True)
+        st.markdown('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;"><h4 style="font-weight: 600; font-size: 14px; color: #0f172a; margin: 0;">Monthly Revenue Trend</h4></div>', unsafe_allow_html=True)
         if len(numeric_cols) > 0:
             # Use all data from the numeric column
             col_data = df[numeric_cols[0]].dropna()
@@ -566,7 +554,7 @@ if st.session_state.df is not None:
 
     # Chart 2: Sales by Category (Pie Chart)
     with col2:
-        st.markdown('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;"><h4 style="font-weight: 600; font-size: 14px; color: #0f172a;">Sales by Category</h4><i class="fa-solid fa-download" style="color: #94a3b8; font-size: 16px; cursor: pointer;"></i></div>', unsafe_allow_html=True)
+        st.markdown('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;"><h4 style="font-weight: 600; font-size: 14px; color: #0f172a; margin: 0;">Sales by Category</h4></div>', unsafe_allow_html=True)
         if len(categorical_cols) > 0 and len(numeric_cols) > 0:
             cat_col = categorical_cols[0]
             val_col = numeric_cols[0]
@@ -595,7 +583,7 @@ if st.session_state.df is not None:
     
     # Chart 3: Quarterly Performance (Bar Chart)
     with col3:
-        st.markdown('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;"><h4 style="font-weight: 600; font-size: 14px; color: #0f172a;">Quarterly Performance</h4><i class="fa-solid fa-download" style="color: #94a3b8; font-size: 16px; cursor: pointer;"></i></div>', unsafe_allow_html=True)
+        st.markdown('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;"><h4 style="font-weight: 600; font-size: 14px; color: #0f172a; margin: 0;">Quarterly Performance</h4></div>', unsafe_allow_html=True)
         if len(numeric_cols) > 0:
             quarters = ['Q1', 'Q2', 'Q3', 'Q4']
             values = df[numeric_cols[0]].head(4).tolist() if len(df) >= 4 else (df[numeric_cols[0]].tolist() + [0] * (4 - len(df)))[:4]
@@ -619,7 +607,7 @@ if st.session_state.df is not None:
 
     # Chart 4: Regional Distribution (Bar Chart)
     with col4:
-        st.markdown('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;"><h4 style="font-weight: 600; font-size: 14px; color: #0f172a;">Regional Distribution</h4><i class="fa-solid fa-download" style="color: #94a3b8; font-size: 16px; cursor: pointer;"></i></div>', unsafe_allow_html=True)
+        st.markdown('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;"><h4 style="font-weight: 600; font-size: 14px; color: #0f172a; margin: 0;">Regional Distribution</h4></div>', unsafe_allow_html=True)
         if len(numeric_cols) > 1:
             regions = df[categorical_cols[0]].head(5).tolist() if len(categorical_cols) > 0 else ['North America', 'Europe', 'Asia', 'South America', 'Africa'][:5]
             values = df[numeric_cols[1]].head(5).tolist() if len(df) >= 5 else (df[numeric_cols[1]].tolist() + [0] * (5 - len(df)))[:5]
@@ -648,42 +636,9 @@ if st.session_state.df is not None:
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
             <div>
                 <h3 style="font-size: 18px; font-weight: 600; color: #0f172a; margin-bottom: 4px;">Raw Data</h3>
-                <p style="font-size: 14px; color: #64748b; margin: 0;">View and download the complete dataset from {st.session_state.filename}</p>
             </div>
         </div>
     """, unsafe_allow_html=True)
-    
-    # Create download buttons in a row
-    col_download1, col_download2, col_download3 = st.columns([1, 1, 4])
-    with col_download1:
-        # Excel download
-        excel_buffer = io.BytesIO()
-        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name='Sheet1')
-        excel_buffer.seek(0)
-        excel_filename = st.session_state.filename if st.session_state.filename.endswith(('.xlsx', '.xls')) else st.session_state.filename.replace('.csv', '.xlsx')
-        st.download_button(
-            label="📥 Download Excel",
-            data=excel_buffer,
-            file_name=excel_filename,
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            key="download_excel_raw"
-        )
-    
-    with col_download2:
-        # CSV download
-        csv_buffer = df.to_csv(index=False).encode('utf-8')
-        csv_filename = st.session_state.filename if st.session_state.filename.endswith('.csv') else st.session_state.filename.replace('.xlsx', '.csv').replace('.xls', '.csv')
-        st.download_button(
-            label="📥 Download CSV",
-            data=csv_buffer,
-            file_name=csv_filename,
-            mime="text/csv",
-            key="download_csv_raw"
-        )
-    
-    # Display the raw data in a styled card
-    st.markdown('<div style="margin-bottom: 16px;"><h4 style="font-weight: 600; font-size: 14px; color: #0f172a;">Data Table</h4></div>', unsafe_allow_html=True)
     
     # Show data info
     st.markdown(f"""
@@ -704,15 +659,6 @@ if st.session_state.df is not None:
     
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 8. AUTO CLEANUP WARNING - Exact Match
-    st.markdown("""
-    <div style="margin-bottom: 32px;">
-    <div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 12px;">
-        <i class="fa-solid fa-triangle-exclamation" style="color: #d97706; font-size: 20px;"></i>
-        <p style="font-size: 14px; color: #92400e; margin: 0; line-height: 1.5;"><strong>Auto-cleanup:</strong> Exported files are automatically deleted after 5 minutes for security. Download them immediately after generation.</p>
-    </div>
-    </div>
-    """, unsafe_allow_html=True)
 
 # 9. FEATURES SECTION - Exact Match
 st.markdown("""
@@ -748,7 +694,7 @@ st.markdown("""
                 <i class="fa-solid fa-share-nodes"></i>
             </div>
             <h4 style="font-weight: 600; color: #0f172a; margin-bottom: 8px; font-size: 14px;">Easy Sharing</h4>
-            <p style="font-size: 12px; color: #64748b; line-height: 1.6;">Export and share your visualizations in multiple formats instantly.</p>
+            <p style="font-size: 12px; color: #64748b; line-height: 1.6;">Share your visualizations instantly with interactive charts.</p>
         </div>
     </div>
 </div>
